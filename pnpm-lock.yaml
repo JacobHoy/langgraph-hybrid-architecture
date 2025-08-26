@@ -42,6 +42,9 @@ importers:
 
   packages/agent:
     dependencies:
+      '@langgraph-minimal/core':
+        specifier: workspace:*
+        version: link:../core
       '@langgraph-minimal/graphs':
         specifier: workspace:*
         version: link:../graphs
@@ -70,6 +73,9 @@ importers:
       '@langchain/openai':
         specifier: ^0.1.0
         version: 0.1.3
+      langsmith:
+        specifier: ^0.1.0
+        version: 0.1.68(openai@4.104.0(zod@3.25.76))
       zod:
         specifier: ^3.22.0
         version: 3.25.76
@@ -95,6 +101,9 @@ importers:
       '@langgraph-minimal/tools':
         specifier: workspace:*
         version: link:../tools
+      openai:
+        specifier: ^4.0.0
+        version: 4.104.0(zod@3.25.76)
       zod:
         specifier: ^3.22.0
         version: 3.25.76

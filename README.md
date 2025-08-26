@@ -19,6 +19,7 @@ This project implements a **hybrid architecture** that gives you the best of bot
 - **Flexibility**: Use tools individually, in workflows, or through the agent
 - **TypeScript**: Full type safety across the entire project
 - **Observability**: Built-in logging and event tracking
+- **LangSmith Integration**: Advanced tracing, debugging, and monitoring (optional)
 
 ## Quickstart
 
@@ -30,7 +31,9 @@ pnpm install
 
 # Set up environment variables
 cp .env.example .env
-# Edit .env and add your OPENAI_API_KEY
+# Edit .env and add your API keys:
+# - OPENAI_API_KEY (required)
+# - LANGSMITH_API_KEY (optional, for observability)
 
 # Start development
 pnpm dev
@@ -185,6 +188,86 @@ fastify.post("/workflows/weather", async (request, reply) => {
 5. **Beginner-friendly**: Clear architecture that's easy to understand
 6. **Production-ready**: Built-in observability and error handling
 
+## Prompt Management System
+
+This project includes a comprehensive prompt management system that centralizes all prompts and makes them LangSmith-compatible.
+
+### Features
+
+- **Centralized Prompts**: All prompts are managed in `packages/core/src/prompts.ts`
+- **Version Control**: Each prompt has version tracking for A/B testing
+- **LangSmith Integration**: Prompts are tracked and can be versioned in LangSmith
+- **Template Engine**: Variable substitution for dynamic prompts
+- **Prompt Registry**: Easy discovery and management of all prompts
+
+### Prompt Categories
+
+#### Agent Prompts
+- **System Prompt**: Main agent personality and capabilities
+- **Response Prompt**: Final response generation with tool results
+
+#### Workflow Prompts
+- **Weather Recommendations**: Generate personalized weather advice
+- **Search Summaries**: Create comprehensive search result summaries
+
+#### Tool Prompts
+- **Calculator Explanations**: Educational math explanations
+- **Search Analysis**: Research result analysis
+
+### Example Usage
+
+```typescript
+import { promptHelpers, executePrompt } from '@langgraph-minimal/core';
+
+// Use helper functions
+const systemPrompt = promptHelpers.agentSystem();
+
+// Execute prompts with variables
+const weatherPrompt = await executePrompt('weather_recommendations', {
+  location: 'San Francisco',
+  temperature: 72,
+  unit: 'fahrenheit'
+}, runId);
+```
+
+### Benefits
+
+- **A/B Testing**: Test different prompt versions in LangSmith
+- **Performance Tracking**: Compare prompt effectiveness
+- **Easy Updates**: Change prompts without code deployments
+- **Consistency**: Centralized prompt management across workflows
+
+## LangSmith Observability (Optional)
+
+This project includes optional LangSmith integration for advanced observability, debugging, and monitoring.
+
+### Setup LangSmith
+
+1. **Get API Key**: Sign up at [LangSmith](https://smith.langchain.com) and get your API key
+2. **Add to Environment**: Add to your `.env` file:
+   ```bash
+   LANGSMITH_API_KEY=your_langsmith_api_key_here
+   LANGSMITH_PROJECT=langgraph-hybrid-architecture
+   ```
+
+### What You'll See in LangSmith
+
+- **Traces**: Every agent request with detailed step-by-step execution
+- **Tool Performance**: Individual tool execution times and success rates
+- **Workflow Analysis**: Visual representation of workflow execution
+- **Error Tracking**: Detailed error context and debugging information
+- **Cost Monitoring**: Token usage and API cost tracking
+- **Performance Metrics**: Latency, throughput, and optimization insights
+- **Prompt Tracking**: Version control and A/B testing for prompts
+
+### Benefits
+
+- **Debugging**: Step-by-step debugging with visual interface
+- **Optimization**: Identify bottlenecks and performance issues
+- **Monitoring**: Real-time health monitoring and alerting
+- **Analytics**: Usage patterns and user behavior insights
+- **Prompt Management**: Version, test, and optimize prompts
+
 ## Next Steps
 
 ### Add More Tools
@@ -228,6 +311,9 @@ this.tools.push({
   }
 });
 ```
+
+### Enable LangSmith
+Set up observability for production monitoring and debugging.
 
 ## Contributing
 

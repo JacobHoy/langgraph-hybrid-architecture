@@ -13,11 +13,7 @@ export const createModel = (modelName: string = "gpt-3.5-turbo") => {
 // Default model instance
 export const defaultModel = createModel();
 
-// Observability helpers
-export const logGraphEvent = (event: string, data?: any) => {
-  const timestamp = new Date().toISOString();
-  console.log(`[${timestamp}] ${event}`, data ? JSON.stringify(data, null, 2) : '');
-};
+// Observability helpers - now exported from langsmith.ts
 
 export const createGraphState = (schema: z.ZodObject<any>) => {
   return z.object({
@@ -47,3 +43,9 @@ export const AnalysisState = createGraphState(z.object({
   sentiment: z.string().optional(),
   keywords: z.array(z.string()).optional(),
 }));
+
+// Export LangSmith functionality
+export * from './langsmith';
+
+// Export prompt management
+export * from './prompts';

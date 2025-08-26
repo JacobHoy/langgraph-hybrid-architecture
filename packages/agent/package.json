@@ -10,6 +10,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@langgraph-minimal/core": "workspace:*",
     "@langgraph-minimal/tools": "workspace:*",
     "@langgraph-minimal/graphs": "workspace:*",
     "openai": "^4.0.0"
