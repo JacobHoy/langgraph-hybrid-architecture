@@ -20,5 +20,10 @@
   "engines": {
     "node": ">=18.0.0",
     "pnpm": ">=9.0.0"
+  },
+  "dependencies": {
+    "@openai/agents": "^0.0.17",
+    "dotenv": "^16.6.1",
+    "openai": "^5.16.0"
   }
 }

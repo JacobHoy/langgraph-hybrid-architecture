@@ -1,4 +1,4 @@
-# Hybrid LangGraph + Agent API Architecture
+# Hybrid LangGraph + OpenAI Agent API Architecture
 
 A minimal, production-ready setup combining LangGraph workflows with OpenAI Agent API for maximum flexibility and power.
 
@@ -8,18 +8,19 @@ This project implements a **hybrid architecture** that gives you the best of bot
 
 1. **Tools** (`packages/tools`) - Framework-agnostic plain TypeScript functions
 2. **Graphs** (`packages/graphs`) - LangGraph workflows that stitch tools together
-3. **Agent API** (`packages/agent`) - Thin layer that treats graphs as tools for OpenAI
+3. **Agent API** (`packages/agent`) - Hybrid layer using OpenAI Agent API with hosted tools + Chat Completions for custom tools
 4. **Gateway** (`gateways/langserve`) - Fastify server exposing both Agent API and direct workflow access
 
 ## Features
 
 - **Framework-agnostic tools**: Plain TypeScript functions that can be used anywhere
 - **LangGraph workflows**: Complex workflows that stitch tools together
-- **OpenAI Agent API**: Simple interface that treats graphs as tools
+- **OpenAI Agent API**: Hybrid approach using hosted tools (web search, code interpreter) + custom tools
 - **Flexibility**: Use tools individually, in workflows, or through the agent
 - **TypeScript**: Full type safety across the entire project
 - **Observability**: Built-in logging and event tracking
 - **LangSmith Integration**: Advanced tracing, debugging, and monitoring (optional)
+- **Hosted Tools**: Built-in web search and code interpreter via OpenAI Agent API
 
 ## Quickstart
 
@@ -49,7 +50,7 @@ langgraph-minimal/
 ├── packages/
 │   ├── tools/          # Framework-agnostic tools (plain TS functions)
 │   ├── graphs/         # LangGraph workflows that stitch tools together
-│   ├── agent/          # Thin Agent API layer that lists tools/functions
+│   ├── agent/          # Hybrid Agent API layer (OpenAI Agent API + Chat Completions)
 │   └── core/           # Shared utilities and configurations
 ├── gateways/
 │   └── langserve/      # Fastify server for serving graphs and agent
@@ -102,7 +103,11 @@ Content-Type: application/json
 
 ## Available Tools
 
-### Individual Tools
+### OpenAI Hosted Tools (via Agent API)
+- **Web Search** - Search the web for current information
+- **Code Interpreter** - Execute code and perform calculations
+
+### Custom Tools (via Chat Completions)
 - **get_weather** - Get weather information for a location
 - **search_web** - Search the web for current information
 - **calculate** - Perform mathematical calculations
@@ -110,13 +115,6 @@ Content-Type: application/json
 ### Workflow Tools
 - **weather_workflow** - Get weather + recommendations
 - **search_workflow** - Search + summarize results
-
-## Development
-
-- `pnpm dev` - Start all services in development mode
-- `pnpm build` - Build all packages
-- `pnpm test` - Run tests across all packages
-- `node test-api.js` - Test API endpoints
 
 ## How It Works
 
@@ -147,11 +145,21 @@ export const runWeatherWorkflow = async (location: string) => {
 };
 ```
 
-### 3. Agent Layer
-The Agent API treats graphs as tools:
+### 3. Agent Layer (Hybrid)
+The Agent API uses a hybrid approach:
 
 ```typescript
 // packages/agent/src/index.ts
+// OpenAI Agent API with hosted tools
+this.agent = new Agent({
+  name: "HybridAgent",
+  model: "gpt-5-mini",
+  tools: [webSearchTool(), codeInterpreterTool()],
+  instructions: "You can search the web and run code..."
+});
+
+// Fallback to Chat Completions for custom tools
+this.tools = toolRegistry.getOpenAITools();
 this.tools.push({
   type: "function",
   function: {
@@ -166,7 +174,7 @@ this.tools.push({
 Exposes both Agent API and direct workflow access:
 
 ```typescript
-// Agent API
+// Agent API (hybrid)
 fastify.post("/agent", async (request, reply) => {
   const response = await agentAPI.runAgent(message);
   return { response };
@@ -179,6 +187,26 @@ fastify.post("/workflows/weather", async (request, reply) => {
 });
 ```
 
+## Agent API Interface Challenges & Solutions
+
+### Challenges Identified
+1. **Wrong Tool Integration**: Initially tried to add `{ type: "web_search" }` directly to tools array
+2. **Missing Proper Imports**: Not importing the hosted tool functions
+3. **Incorrect Execution Method**: Trying to use `agent.invoke()` instead of `run(agent, message)`
+4. **Tool Type Mismatches**: Agent API expects different tool types than Chat Completions
+
+### Solutions Implemented
+1. **Proper Hosted Tools**: Using `webSearchTool()`, `codeInterpreterTool()` functions
+2. **Correct Imports**: `import { Agent, run, webSearchTool, codeInterpreterTool } from '@openai/agents'`
+3. **Hybrid Architecture**: Agent API for hosted tools, Chat Completions for custom tools
+4. **Fallback Strategy**: Seamless fallback when Agent API can't handle custom tools
+
+### Current Implementation
+- **Agent API**: Handles web search, code interpretation, and general queries
+- **Chat Completions**: Handles custom tools and LangGraph workflows
+- **Automatic Fallback**: Seamless switching between APIs based on query type
+- **Unified Interface**: Single `/agent` endpoint that intelligently routes requests
+
 ## Benefits
 
 1. **Separation of Concerns**: Each layer has a clear responsibility
@@ -187,6 +215,7 @@ fastify.post("/workflows/weather", async (request, reply) => {
 4. **Scalability**: Easy to add new tools and workflows
 5. **Beginner-friendly**: Clear architecture that's easy to understand
 6. **Production-ready**: Built-in observability and error handling
+7. **Best of Both Worlds**: OpenAI's hosted tools + custom LangGraph workflows
 
 ## Prompt Management System
 
@@ -267,6 +296,13 @@ This project includes optional LangSmith integration for advanced observability,
 - **Monitoring**: Real-time health monitoring and alerting
 - **Analytics**: Usage patterns and user behavior insights
 - **Prompt Management**: Version, test, and optimize prompts
+
+## Development
+
+- `pnpm dev` - Start all services in development mode
+- `pnpm build` - Build all packages
+- `pnpm test` - Run tests across all packages
+- `node test-api.js` - Test API endpoints
 
 ## Next Steps
 
