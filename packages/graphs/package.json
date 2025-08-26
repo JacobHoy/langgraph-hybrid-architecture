@@ -1,0 +1,23 @@
+{
+  "name": "@langgraph-minimal/graphs",
+  "version": "1.0.0",
+  "description": "LangGraph workflows that stitch tools together",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@langgraph-minimal/core": "workspace:*",
+    "@langgraph-minimal/tools": "workspace:*",
+    "@langchain/core": "^0.3.58",
+    "@langchain/langgraph": "^0.4.6",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}

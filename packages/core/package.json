@@ -1,0 +1,22 @@
+{
+  "name": "@langgraph-minimal/core",
+  "version": "1.0.0",
+  "description": "Core model and observability helpers for LangGraph",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@langchain/core": "^0.3.58",
+    "@langchain/openai": "^0.1.0",
+    "@langchain/langgraph": "^0.4.6",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}

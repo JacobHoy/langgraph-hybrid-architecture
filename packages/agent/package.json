@@ -1,0 +1,21 @@
+{
+  "name": "@langgraph-minimal/agent",
+  "version": "1.0.0",
+  "description": "Thin Agent API layer",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@langgraph-minimal/tools": "workspace:*",
+    "@langgraph-minimal/graphs": "workspace:*",
+    "openai": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}

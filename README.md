@@ -1,0 +1,242 @@
+# Hybrid LangGraph + Agent API Architecture
+
+A minimal, production-ready setup combining LangGraph workflows with OpenAI Agent API for maximum flexibility and power.
+
+## Architecture Overview
+
+This project implements a **hybrid architecture** that gives you the best of both worlds:
+
+1. **Tools** (`packages/tools`) - Framework-agnostic plain TypeScript functions
+2. **Graphs** (`packages/graphs`) - LangGraph workflows that stitch tools together
+3. **Agent API** (`packages/agent`) - Thin layer that treats graphs as tools for OpenAI
+4. **Gateway** (`gateways/langserve`) - Fastify server exposing both Agent API and direct workflow access
+
+## Features
+
+- **Framework-agnostic tools**: Plain TypeScript functions that can be used anywhere
+- **LangGraph workflows**: Complex workflows that stitch tools together
+- **OpenAI Agent API**: Simple interface that treats graphs as tools
+- **Flexibility**: Use tools individually, in workflows, or through the agent
+- **TypeScript**: Full type safety across the entire project
+- **Observability**: Built-in logging and event tracking
+
+## Quickstart
+
+```bash
+# Install dependencies
+corepack enable
+npm i -g pnpm@9
+pnpm install
+
+# Set up environment variables
+cp .env.example .env
+# Edit .env and add your OPENAI_API_KEY
+
+# Start development
+pnpm dev
+
+# Test the API
+node test-api.js
+```
+
+## Project Structure
+
+```
+langgraph-minimal/
+├── packages/
+│   ├── tools/          # Framework-agnostic tools (plain TS functions)
+│   ├── graphs/         # LangGraph workflows that stitch tools together
+│   ├── agent/          # Thin Agent API layer that lists tools/functions
+│   └── core/           # Shared utilities and configurations
+├── gateways/
+│   └── langserve/      # Fastify server for serving graphs and agent
+├── package.json        # Root workspace configuration
+├── test-api.js         # API testing script
+└── README.md          # This file
+```
+
+## API Endpoints
+
+### Health Check
+```bash
+GET /ping
+```
+
+### Agent API
+```bash
+POST /agent
+Content-Type: application/json
+
+{
+  "message": "What's the weather like in San Francisco?"
+}
+```
+
+### Available Tools
+```bash
+GET /tools
+```
+
+### Direct Workflow Access
+```bash
+POST /workflows/weather
+Content-Type: application/json
+
+{
+  "location": "New York, NY",
+  "unit": "fahrenheit"
+}
+```
+
+```bash
+POST /workflows/search
+Content-Type: application/json
+
+{
+  "query": "latest AI developments"
+}
+```
+
+## Available Tools
+
+### Individual Tools
+- **get_weather** - Get weather information for a location
+- **search_web** - Search the web for current information
+- **calculate** - Perform mathematical calculations
+
+### Workflow Tools
+- **weather_workflow** - Get weather + recommendations
+- **search_workflow** - Search + summarize results
+
+## Development
+
+- `pnpm dev` - Start all services in development mode
+- `pnpm build` - Build all packages
+- `pnpm test` - Run tests across all packages
+- `node test-api.js` - Test API endpoints
+
+## How It Works
+
+### 1. Tools Layer
+Tools are plain TypeScript functions with Zod validation:
+
+```typescript
+// packages/tools/src/weather.ts
+export const weatherTool: Tool = {
+  name: "get_weather",
+  description: "Get weather information",
+  parameters: WeatherParams,
+  execute: async (args) => {
+    // Implementation here
+  }
+};
+```
+
+### 2. Graphs Layer
+Workflows stitch tools together:
+
+```typescript
+// packages/graphs/src/weather-workflow.ts
+export const runWeatherWorkflow = async (location: string) => {
+  const weatherData = await weatherTool.execute({ location });
+  const recommendations = generateRecommendations(weatherData);
+  return { weatherData, recommendations };
+};
+```
+
+### 3. Agent Layer
+The Agent API treats graphs as tools:
+
+```typescript
+// packages/agent/src/index.ts
+this.tools.push({
+  type: "function",
+  function: {
+    name: "weather_workflow",
+    description: "Get weather + recommendations",
+    parameters: { /* ... */ }
+  }
+});
+```
+
+### 4. Gateway Layer
+Exposes both Agent API and direct workflow access:
+
+```typescript
+// Agent API
+fastify.post("/agent", async (request, reply) => {
+  const response = await agentAPI.runAgent(message);
+  return { response };
+});
+
+// Direct workflow access
+fastify.post("/workflows/weather", async (request, reply) => {
+  const result = await runWeatherWorkflow(location);
+  return { result };
+});
+```
+
+## Benefits
+
+1. **Separation of Concerns**: Each layer has a clear responsibility
+2. **Framework-agnostic**: Tools can be used with any framework
+3. **Flexibility**: Use tools individually, in workflows, or through the agent
+4. **Scalability**: Easy to add new tools and workflows
+5. **Beginner-friendly**: Clear architecture that's easy to understand
+6. **Production-ready**: Built-in observability and error handling
+
+## Next Steps
+
+### Add More Tools
+Create new tools in `packages/tools/src/`:
+
+```typescript
+export const newTool: Tool = {
+  name: "new_tool",
+  description: "Description of what the tool does",
+  parameters: z.object({
+    // Define parameters
+  }),
+  execute: async (args) => {
+    // Implementation
+  }
+};
+```
+
+### Add More Workflows
+Create new workflows in `packages/graphs/src/`:
+
+```typescript
+export const runNewWorkflow = async (input: string) => {
+  // Stitch tools together
+  const result1 = await tool1.execute(args1);
+  const result2 = await tool2.execute(args2);
+  return { result1, result2 };
+};
+```
+
+### Add to Agent API
+Register new tools/workflows in `packages/agent/src/index.ts`:
+
+```typescript
+this.tools.push({
+  type: "function",
+  function: {
+    name: "new_workflow",
+    description: "Description",
+    parameters: { /* ... */ }
+  }
+});
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests
+5. Submit a pull request
+
+## License
+
+MIT
