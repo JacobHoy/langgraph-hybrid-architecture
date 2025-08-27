@@ -42,6 +42,60 @@ fastify.get("/tools", async (request, reply) => {
   }
 });
 
+// Feature flag management endpoints
+fastify.post("/api/enable-builtin-tools", async (request, reply) => {
+  try {
+    agentAPI.enableBuiltInTools();
+    return {
+      success: true,
+      message: 'Built-in tools enabled',
+      flags: agentAPI.getAvailableTools().featureFlags
+    };
+  } catch (error) {
+    fastify.log.error(error);
+    return reply.status(500).send({ error: "Internal server error" });
+  }
+});
+
+fastify.post("/api/disable-builtin-tools", async (request, reply) => {
+  try {
+    agentAPI.disableBuiltInTools();
+    return {
+      success: true,
+      message: 'Built-in tools disabled',
+      flags: agentAPI.getAvailableTools().featureFlags
+    };
+  } catch (error) {
+    fastify.log.error(error);
+    return reply.status(500).send({ error: "Internal server error" });
+  }
+});
+
+fastify.post("/api/toggle-builtin-tools", async (request, reply) => {
+  try {
+    agentAPI.toggleBuiltInTools();
+    return {
+      success: true,
+      message: 'Built-in tools toggled',
+      flags: agentAPI.getAvailableTools().featureFlags
+    };
+  } catch (error) {
+    fastify.log.error(error);
+    return reply.status(500).send({ error: "Internal server error" });
+  }
+});
+
+fastify.get("/api/flags", async (request, reply) => {
+  try {
+    return { 
+      flags: agentAPI.getAvailableTools().featureFlags
+    };
+  } catch (error) {
+    fastify.log.error(error);
+    return reply.status(500).send({ error: "Internal server error" });
+  }
+});
+
 // Individual workflow endpoints (for direct access)
 fastify.post("/workflows/weather", async (request, reply) => {
   const { location, unit = "fahrenheit" } = request.body as { location: string; unit?: string };

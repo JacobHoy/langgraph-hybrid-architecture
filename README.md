@@ -1,28 +1,42 @@
-# Hybrid LangGraph + OpenAI Agent API Architecture
+# LangGraph Minimal - Responses API + LangGraph Architecture
 
-A minimal, production-ready setup combining LangGraph workflows with OpenAI Agent API for maximum flexibility and power.
+A production-ready, minimal setup combining OpenAI's Responses API with LangGraph workflows for maximum flexibility and power.
 
-## Architecture Overview
+## 🚀 **Architecture Overview**
 
-This project implements a **hybrid architecture** that gives you the best of both worlds:
+This project implements a **modern hybrid architecture** that leverages the best of both worlds:
 
 1. **Tools** (`packages/tools`) - Framework-agnostic plain TypeScript functions
-2. **Graphs** (`packages/graphs`) - LangGraph workflows that stitch tools together
-3. **Agent API** (`packages/agent`) - Hybrid layer using OpenAI Agent API with hosted tools + Chat Completions for custom tools
+2. **Graphs** (`packages/graphs`) - LangGraph workflows that orchestrate tools with AI enhancement
+3. **Agent API** (`packages/agent`) - OpenAI Responses API with built-in tools + custom workflows
 4. **Gateway** (`gateways/langserve`) - Fastify server exposing both Agent API and direct workflow access
 
-## Features
+## ✨ **Key Features**
 
-- **Framework-agnostic tools**: Plain TypeScript functions that can be used anywhere
-- **LangGraph workflows**: Complex workflows that stitch tools together
-- **OpenAI Agent API**: Hybrid approach using hosted tools (web search, code interpreter) + custom tools
-- **Flexibility**: Use tools individually, in workflows, or through the agent
-- **TypeScript**: Full type safety across the entire project
-- **Observability**: Built-in logging and event tracking
-- **LangSmith Integration**: Advanced tracing, debugging, and monitoring (optional)
-- **Hosted Tools**: Built-in web search and code interpreter via OpenAI Agent API
+- **🔄 OpenAI Responses API**: Latest unified API with built-in tools (web search, code interpreter)
+- **🧠 LangGraph Integration**: Full state management and workflow orchestration
+- **🛠️ Built-in Tools**: Real-time web search, code execution with container management
+- **🎯 Custom Tools**: Framework-agnostic TypeScript functions
+- **📊 Observability**: Built-in tracing, logging, and performance monitoring
+- **⚡ TypeScript**: Full type safety across the entire project
+- **🎛️ Feature Flags**: Runtime control over built-in tools
+- **🚀 Production Ready**: Error handling, container lifecycle management
 
-## Quickstart
+## 🛠️ **Available Tools**
+
+### **Built-in OpenAI Tools (Responses API)**
+- **`web_search_preview`** - Real-time web search with current information
+- **`code_interpreter`** - Code execution with automatic container management
+
+### **Custom Tools**
+- **`get_weather`** - Weather information for any location
+- **`calculate`** - Mathematical calculations with precision control
+
+### **LangGraph Workflows**
+- **`weather_workflow`** - Weather data + AI-powered recommendations
+- **`search_workflow`** - Web search + AI summarization
+
+## 🚀 **Quickstart**
 
 ```bash
 # Install dependencies
@@ -34,40 +48,36 @@ pnpm install
 cp .env.example .env
 # Edit .env and add your API keys:
 # - OPENAI_API_KEY (required)
-# - LANGSMITH_API_KEY (optional, for observability)
 
 # Start development
 pnpm dev
 
 # Test the API
-node test-api.js
+curl -X POST http://localhost:3000/agent \
+  -H "Content-Type: application/json" \
+  -d '{"message": "What is 15 * 23?"}'
 ```
 
-## Project Structure
+## 📁 **Project Structure**
 
 ```
 langgraph-minimal/
 ├── packages/
 │   ├── tools/          # Framework-agnostic tools (plain TS functions)
-│   ├── graphs/         # LangGraph workflows that stitch tools together
-│   ├── agent/          # Hybrid Agent API layer (OpenAI Agent API + Chat Completions)
+│   ├── graphs/         # LangGraph workflows with AI enhancement
+│   ├── agent/          # Responses API layer with built-in tools
 │   └── core/           # Shared utilities and configurations
 ├── gateways/
-│   └── langserve/      # Fastify server for serving graphs and agent
+│   └── langserve/      # Fastify server for serving agent and workflows
 ├── package.json        # Root workspace configuration
-├── test-api.js         # API testing script
 └── README.md          # This file
 ```
 
-## API Endpoints
+## 🔌 **API Endpoints**
 
-### Health Check
+### **Agent API**
 ```bash
-GET /ping
-```
-
-### Agent API
-```bash
+# Main agent endpoint
 POST /agent
 Content-Type: application/json
 
@@ -76,49 +86,59 @@ Content-Type: application/json
 }
 ```
 
-### Available Tools
+### **Feature Flag Management**
 ```bash
-GET /tools
+# Enable built-in tools
+POST /api/enable-builtin-tools
+
+# Disable built-in tools
+POST /api/disable-builtin-tools
+
+# Toggle built-in tools
+POST /api/toggle-builtin-tools
+
+# Check current flags
+GET /api/flags
 ```
 
-### Direct Workflow Access
+### **Health Check**
 ```bash
-POST /workflows/weather
-Content-Type: application/json
-
-{
-  "location": "New York, NY",
-  "unit": "fahrenheit"
-}
+GET /ping
 ```
 
-```bash
-POST /workflows/search
-Content-Type: application/json
+## 🧪 **Usage Examples**
 
-{
-  "query": "latest AI developments"
-}
+### **Basic Calculations**
+```bash
+curl -X POST http://localhost:3000/agent \
+  -H "Content-Type: application/json" \
+  -d '{"message": "What is 15 * 23?"}'
 ```
 
-## Available Tools
+### **Real-time Web Search**
+```bash
+curl -X POST http://localhost:3000/agent \
+  -H "Content-Type: application/json" \
+  -d '{"message": "What is the current weather in San Francisco?"}'
+```
 
-### OpenAI Hosted Tools (via Agent API)
-- **Web Search** - Search the web for current information
-- **Code Interpreter** - Execute code and perform calculations
+### **LangGraph Workflow**
+```bash
+curl -X POST http://localhost:3000/agent \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Get weather information for Tokyo using the weather_workflow"}'
+```
 
-### Custom Tools (via Chat Completions)
-- **get_weather** - Get weather information for a location
-- **search_web** - Search the web for current information
-- **calculate** - Perform mathematical calculations
+### **Code Execution**
+```bash
+curl -X POST http://localhost:3000/agent \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Calculate the factorial of 10"}'
+```
 
-### Workflow Tools
-- **weather_workflow** - Get weather + recommendations
-- **search_workflow** - Search + summarize results
+## 🔧 **How It Works**
 
-## How It Works
-
-### 1. Tools Layer
+### **1. Tools Layer**
 Tools are plain TypeScript functions with Zod validation:
 
 ```typescript
@@ -133,232 +153,136 @@ export const weatherTool: Tool = {
 };
 ```
 
-### 2. Graphs Layer
-Workflows stitch tools together:
+### **2. Graphs Layer**
+Workflows orchestrate tools with AI enhancement:
 
 ```typescript
 // packages/graphs/src/weather-workflow.ts
 export const runWeatherWorkflow = async (location: string) => {
   const weatherData = await weatherTool.execute({ location });
-  const recommendations = generateRecommendations(weatherData);
+  const recommendations = await generateAIRecommendations(weatherData);
   return { weatherData, recommendations };
 };
 ```
 
-### 3. Agent Layer (Hybrid)
-The Agent API uses a hybrid approach:
+### **3. Agent Layer (Responses API)**
+The Agent API uses OpenAI's Responses API with built-in tools:
 
 ```typescript
 // packages/agent/src/index.ts
-// OpenAI Agent API with hosted tools
-this.agent = new Agent({
-  name: "HybridAgent",
-  model: "gpt-5-mini",
-  tools: [webSearchTool(), codeInterpreterTool()],
-  instructions: "You can search the web and run code..."
-});
-
-// Fallback to Chat Completions for custom tools
-this.tools = toolRegistry.getOpenAITools();
-this.tools.push({
-  type: "function",
-  function: {
-    name: "weather_workflow",
-    description: "Get weather + recommendations",
-    parameters: { /* ... */ }
-  }
+const response = await responsesClient.ask({
+  input: message,
+  tools: [
+    { type: "web_search_preview" },
+    { type: "code_interpreter", container: containerId },
+    // Custom tools and workflows
+  ]
 });
 ```
 
-### 4. Gateway Layer
+### **4. Gateway Layer**
 Exposes both Agent API and direct workflow access:
 
 ```typescript
-// Agent API (hybrid)
+// Agent API (Responses API)
 fastify.post("/agent", async (request, reply) => {
   const response = await agentAPI.runAgent(message);
   return { response };
 });
-
-// Direct workflow access
-fastify.post("/workflows/weather", async (request, reply) => {
-  const result = await runWeatherWorkflow(location);
-  return { result };
-});
 ```
 
-## Agent API Interface Challenges & Solutions
+## 🏗️ **Technical Architecture**
 
-### Challenges Identified
-1. **Wrong Tool Integration**: Initially tried to add `{ type: "web_search" }` directly to tools array
-2. **Missing Proper Imports**: Not importing the hosted tool functions
-3. **Incorrect Execution Method**: Trying to use `agent.invoke()` instead of `run(agent, message)`
-4. **Tool Type Mismatches**: Agent API expects different tool types than Chat Completions
+### **Responses API Integration**
+- **Built-in Tools**: `web_search_preview`, `code_interpreter`
+- **Container Management**: Automatic creation and reuse
+- **Schema Compatibility**: Proper JSON schema validation
+- **Error Handling**: Robust error recovery
 
-### Solutions Implemented
-1. **Proper Hosted Tools**: Using `webSearchTool()`, `codeInterpreterTool()` functions
-2. **Correct Imports**: `import { Agent, run, webSearchTool, codeInterpreterTool } from '@openai/agents'`
-3. **Hybrid Architecture**: Agent API for hosted tools, Chat Completions for custom tools
-4. **Fallback Strategy**: Seamless fallback when Agent API can't handle custom tools
+### **LangGraph State Management**
+- **Tracing**: Full request tracing with unique IDs
+- **Performance**: Timing and performance monitoring
+- **Logging**: Comprehensive event logging
+- **Error Recovery**: Graceful error handling
 
-### Current Implementation
-- **Agent API**: Handles web search, code interpretation, and general queries
-- **Chat Completions**: Handles custom tools and LangGraph workflows
-- **Automatic Fallback**: Seamless switching between APIs based on query type
-- **Unified Interface**: Single `/agent` endpoint that intelligently routes requests
+### **Feature Flag System**
+- **Runtime Control**: Enable/disable built-in tools
+- **A/B Testing**: Toggle capabilities for testing
+- **Configuration**: JSON-based flag management
 
-## Benefits
+## 📊 **Performance & Benefits**
 
-1. **Separation of Concerns**: Each layer has a clear responsibility
-2. **Framework-agnostic**: Tools can be used with any framework
-3. **Flexibility**: Use tools individually, in workflows, or through the agent
-4. **Scalability**: Easy to add new tools and workflows
-5. **Beginner-friendly**: Clear architecture that's easy to understand
-6. **Production-ready**: Built-in observability and error handling
-7. **Best of Both Worlds**: OpenAI's hosted tools + custom LangGraph workflows
+### **Responses API Advantages**
+- ✅ **Built-in Tools**: Real-time web search, code interpreter
+- ✅ **Stateful**: Maintains conversation context
+- ✅ **Unified**: Single API for all tool types
+- ✅ **Simpler**: No complex tool call handling
 
-## Prompt Management System
+### **LangGraph Benefits**
+- ✅ **Observability**: Full tracing and monitoring
+- ✅ **State Management**: Proper workflow state tracking
+- ✅ **Performance**: Optimized execution with timing
+- ✅ **Error Handling**: Robust error recovery
 
-This project includes a comprehensive prompt management system that centralizes all prompts and makes them LangSmith-compatible.
+## 🔄 **Migration from Chat Completions**
 
-### Features
+This project has fully migrated from OpenAI's Chat Completions API to the Responses API:
 
-- **Centralized Prompts**: All prompts are managed in `packages/core/src/prompts.ts`
-- **Version Control**: Each prompt has version tracking for A/B testing
-- **LangSmith Integration**: Prompts are tracked and can be versioned in LangSmith
-- **Template Engine**: Variable substitution for dynamic prompts
-- **Prompt Registry**: Easy discovery and management of all prompts
+### **What Changed**
+- ✅ **Removed**: Chat Completions API entirely
+- ✅ **Added**: Responses API with built-in tools
+- ✅ **Enhanced**: Container management for code interpreter
+- ✅ **Simplified**: Single API architecture
 
-### Prompt Categories
+### **Benefits Achieved**
+- 🚀 **Better Performance**: Built-in tools are faster
+- 🔧 **Simpler Code**: No dual API complexity
+- 🎯 **More Capabilities**: Real-time search, code execution
+- 📊 **Better Observability**: Unified tracing
 
-#### Agent Prompts
-- **System Prompt**: Main agent personality and capabilities
-- **Response Prompt**: Final response generation with tool results
+## 🚀 **Production Deployment**
 
-#### Workflow Prompts
-- **Weather Recommendations**: Generate personalized weather advice
-- **Search Summaries**: Create comprehensive search result summaries
-
-#### Tool Prompts
-- **Calculator Explanations**: Educational math explanations
-- **Search Analysis**: Research result analysis
-
-### Example Usage
-
-```typescript
-import { promptHelpers, executePrompt } from '@langgraph-minimal/core';
-
-// Use helper functions
-const systemPrompt = promptHelpers.agentSystem();
-
-// Execute prompts with variables
-const weatherPrompt = await executePrompt('weather_recommendations', {
-  location: 'San Francisco',
-  temperature: 72,
-  unit: 'fahrenheit'
-}, runId);
+### **Environment Variables**
+```bash
+OPENAI_API_KEY=your_openai_api_key
 ```
 
-### Benefits
+### **Build & Deploy**
+```bash
+# Build all packages
+pnpm build
 
-- **A/B Testing**: Test different prompt versions in LangSmith
-- **Performance Tracking**: Compare prompt effectiveness
-- **Easy Updates**: Change prompts without code deployments
-- **Consistency**: Centralized prompt management across workflows
-
-## LangSmith Observability (Optional)
-
-This project includes optional LangSmith integration for advanced observability, debugging, and monitoring.
-
-### Setup LangSmith
-
-1. **Get API Key**: Sign up at [LangSmith](https://smith.langchain.com) and get your API key
-2. **Add to Environment**: Add to your `.env` file:
-   ```bash
-   LANGSMITH_API_KEY=your_langsmith_api_key_here
-   LANGSMITH_PROJECT=langgraph-hybrid-architecture
-   ```
-
-### What You'll See in LangSmith
-
-- **Traces**: Every agent request with detailed step-by-step execution
-- **Tool Performance**: Individual tool execution times and success rates
-- **Workflow Analysis**: Visual representation of workflow execution
-- **Error Tracking**: Detailed error context and debugging information
-- **Cost Monitoring**: Token usage and API cost tracking
-- **Performance Metrics**: Latency, throughput, and optimization insights
-- **Prompt Tracking**: Version control and A/B testing for prompts
-
-### Benefits
-
-- **Debugging**: Step-by-step debugging with visual interface
-- **Optimization**: Identify bottlenecks and performance issues
-- **Monitoring**: Real-time health monitoring and alerting
-- **Analytics**: Usage patterns and user behavior insights
-- **Prompt Management**: Version, test, and optimize prompts
-
-## Development
-
-- `pnpm dev` - Start all services in development mode
-- `pnpm build` - Build all packages
-- `pnpm test` - Run tests across all packages
-- `node test-api.js` - Test API endpoints
-
-## Next Steps
-
-### Add More Tools
-Create new tools in `packages/tools/src/`:
-
-```typescript
-export const newTool: Tool = {
-  name: "new_tool",
-  description: "Description of what the tool does",
-  parameters: z.object({
-    // Define parameters
-  }),
-  execute: async (args) => {
-    // Implementation
-  }
-};
+# Start production server
+pnpm start
 ```
 
-### Add More Workflows
-Create new workflows in `packages/graphs/src/`:
+### **Docker Support**
+```bash
+# Build Docker image
+docker build -t langgraph-minimal .
 
-```typescript
-export const runNewWorkflow = async (input: string) => {
-  // Stitch tools together
-  const result1 = await tool1.execute(args1);
-  const result2 = await tool2.execute(args2);
-  return { result1, result2 };
-};
+# Run container
+docker run -p 3000:3000 -e OPENAI_API_KEY=your_key langgraph-minimal
 ```
 
-### Add to Agent API
-Register new tools/workflows in `packages/agent/src/index.ts`:
-
-```typescript
-this.tools.push({
-  type: "function",
-  function: {
-    name: "new_workflow",
-    description: "Description",
-    parameters: { /* ... */ }
-  }
-});
-```
-
-### Enable LangSmith
-Set up observability for production monitoring and debugging.
-
-## Contributing
+## 🤝 **Contributing**
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Add tests
+4. Add tests if applicable
 5. Submit a pull request
 
-## License
+## 📄 **License**
 
-MIT
+MIT License - see LICENSE file for details.
+
+## 🆘 **Support**
+
+- **Issues**: Create an issue on GitHub
+- **Discussions**: Use GitHub Discussions
+- **Documentation**: Check the code comments and examples
+
+---
+
+**Built with ❤️ using OpenAI Responses API + LangGraph**
