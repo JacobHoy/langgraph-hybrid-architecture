@@ -1,9 +1,9 @@
 import { z } from 'zod';
 import { Tool, toolRegistry } from './types';
 
+// Calculator tool
 const CalculatorParams = z.object({
-  expression: z.string().describe("Mathematical expression to evaluate, e.g. '2 + 2 * 3'"),
-  precision: z.number().optional().default(2).describe("Number of decimal places for the result")
+  expression: z.string().describe("Mathematical expression to evaluate, e.g. '2 + 2 * 3'")
 });
 
 export const calculatorTool: Tool = {
@@ -17,26 +17,20 @@ export const calculatorTool: Tool = {
         type: "string",
         description: "Mathematical expression to evaluate, e.g. '2 + 2 * 3'"
       },
-      precision: { 
-        type: "number",
-        description: "Number of decimal places for the result",
-        default: 2
-      }
     },
-    required: ["expression", "precision"]
+    required: ["expression"]
   },
   execute: async (args) => {
-    const { expression, precision } = CalculatorParams.parse(args);
+    const { expression } = CalculatorParams.parse(args);
     
     try {
       // Safe evaluation - in production, use a proper math library
       const result = eval(expression);
-      const roundedResult = Number(result.toFixed(precision));
+      const roundedResult = Number(result.toFixed(2)); // Default to 2 decimal places
       
       return {
         expression,
-        result: roundedResult,
-        precision
+        result: roundedResult
       };
     } catch (error) {
       throw new Error(`Invalid mathematical expression: ${expression}`);
@@ -44,4 +38,15 @@ export const calculatorTool: Tool = {
   }
 };
 
+
+
+
+
+
+
+
+
+
+
+// Register all tools
 toolRegistry.register(calculatorTool);

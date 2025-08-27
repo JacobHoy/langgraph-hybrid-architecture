@@ -2,8 +2,7 @@ import { z } from 'zod';
 import { Tool, toolRegistry } from './types';
 
 const WeatherParams = z.object({
-  location: z.string().describe("The city and state, e.g. San Francisco, CA"),
-  unit: z.enum(['celsius', 'fahrenheit']).optional().default('fahrenheit')
+  location: z.string().describe("The city and state, e.g. San Francisco, CA")
 });
 
 export const weatherTool: Tool = {
@@ -16,23 +15,18 @@ export const weatherTool: Tool = {
       location: { 
         type: "string",
         description: "The city and state, e.g. San Francisco, CA"
-      },
-      unit: { 
-        type: "string", 
-        enum: ["celsius", "fahrenheit"],
-        default: "fahrenheit"
       }
     },
-    required: ["location", "unit"]
+    required: ["location"]
   },
   execute: async (args) => {
-    const { location, unit } = WeatherParams.parse(args);
+    const { location } = WeatherParams.parse(args);
     
     // Mock weather API call - replace with real implementation
     const mockWeather = {
       location,
-      temperature: unit === 'celsius' ? 22 : 72,
-      unit,
+      temperature: 72,
+      unit: "fahrenheit",
       condition: "Sunny",
       humidity: "65%",
       windSpeed: "5 mph"

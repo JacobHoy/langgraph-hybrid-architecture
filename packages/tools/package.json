@@ -10,7 +10,8 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "zod": "^3.22.0"
+    "zod": "^3.22.0",
+    "openai": "^5.16.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

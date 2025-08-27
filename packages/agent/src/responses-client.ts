@@ -176,10 +176,11 @@ export class ResponsesClient {
   async ask(request: ResponsesRequest): Promise<ResponsesResponse> {
     const tools = await this.buildTools(request.tools);
 
-    const response = await this.openai.responses.create({
+    // First call: Get initial response (may include function calls)
+    const requestBody = {
       model: this.config.model!,
       input: request.input,
-      tools,
+      ...(tools.length > 0 && { tools }),
       ...(request.responseFormat && { 
         text: { 
           format: request.responseFormat 
@@ -190,9 +191,47 @@ export class ResponsesClient {
       ...(request.topP !== undefined && { top_p: request.topP }),
       ...(request.topLogprobs !== undefined && { top_logprobs: request.topLogprobs }),
       ...(request.parallelToolCalls !== undefined && { parallel_tool_calls: request.parallelToolCalls })
-    });
+    };
 
-    return this.parseResponse(response);
+
+
+    const firstResponse = await this.openai.responses.create(requestBody);
+
+    // Check for function calls
+    const functionCalls = (firstResponse.output ?? []).filter((output: any) => output.type === "function_call");
+    
+    if (functionCalls.length > 0) {
+      // Execute function calls
+      const toolOutputs: { call_id: string; output: string }[] = [];
+      
+      for (const call of functionCalls) {
+        try {
+          const args = JSON.parse((call as any).arguments || "{}");
+          const result = await this.executeTool((call as any).name!, args);
+          toolOutputs.push({ 
+            call_id: (call as any).call_id!, 
+            output: JSON.stringify(result) 
+          });
+        } catch (error) {
+          console.error(`❌ Error executing tool ${(call as any).name}:`, error);
+          toolOutputs.push({ 
+            call_id: (call as any).call_id!, 
+            output: JSON.stringify({ error: (error as Error).message }) 
+          });
+        }
+      }
+
+      // Second call: Return tool results to get final answer
+      const finalResponse = await this.openai.responses.create({
+        model: this.config.model!,
+        previous_response_id: firstResponse.id,
+        tool_outputs: toolOutputs
+      } as any);
+
+      return this.parseResponse(finalResponse);
+    }
+
+    return this.parseResponse(firstResponse);
   }
 
   /**
@@ -230,8 +269,8 @@ export class ResponsesClient {
     const registryTools = toolRegistry.getOpenAITools().map(tool => ({
       type: "function" as const,
       name: tool.function.name,
-      parameters: this.fixSchemaForResponses(tool.function.parameters),
-      strict: true
+      description: tool.function.description,
+      parameters: this.fixSchemaForResponses(tool.function.parameters)
     }));
 
     tools.push(...registryTools);
@@ -247,6 +286,20 @@ export class ResponsesClient {
     }
 
     return tools;
+  }
+
+  /**
+   * Execute a tool by name
+   */
+  private async executeTool(name: string, args: any): Promise<any> {
+    const { toolRegistry } = require('@langgraph-minimal/tools');
+    const tool = toolRegistry.get(name);
+    
+    if (!tool) {
+      throw new Error(`Tool '${name}' not found`);
+    }
+    
+    return await tool.execute(args);
   }
 
   /**

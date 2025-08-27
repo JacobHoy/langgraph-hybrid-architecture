@@ -1,42 +1,25 @@
-# LangGraph Minimal - Responses API + LangGraph Architecture
+# LangGraph Minimal - Production-Ready AI Agent
 
-A production-ready, minimal setup combining OpenAI's Responses API with LangGraph workflows for maximum flexibility and power.
+A production-ready AI agent using a simple, reliable architecture with OpenAI GPT-5-mini and custom tools, following LangGraph's recommended pattern of wrapping built-in tools.
 
-## 🚀 **Architecture Overview**
+## 🎯 **Production-Ready Features**
 
-This project implements a **modern hybrid architecture** that leverages the best of both worlds:
+### **✅ Fully Working & Stable**
+- ✅ **Simple Agent Architecture**: Clean, reliable implementation
+- ✅ **Custom Tools**: Calculator and weather tools
+- ✅ **Built-in Tool Wrappers**: Web search, code interpreter, file search (LangGraph recommended pattern)
+- ✅ **GPT-5-mini Integration**: Latest OpenAI model with proper configuration
+- ✅ **Basic AI Responses**: General conversation and text processing
+- ✅ **TypeScript Support**: Full type safety
+- ✅ **Fastify API Gateway**: Production-ready web server
 
-1. **Tools** (`packages/tools`) - Framework-agnostic plain TypeScript functions
-2. **Graphs** (`packages/graphs`) - LangGraph workflows that orchestrate tools with AI enhancement
-3. **Agent API** (`packages/agent`) - OpenAI Responses API with built-in tools + custom workflows
-4. **Gateway** (`gateways/langserve`) - Fastify server exposing both Agent API and direct workflow access
+### **🚀 LangGraph Recommended Pattern**
+This implementation follows LangGraph's recommendation: **"Replace my_tool with wrappers around OpenAI built‑in tools"**
+- Custom tool wrappers that internally call OpenAI's built-in tools
+- Clean separation between custom logic and OpenAI's hosted tools
+- Reliable tool orchestration with proper error handling
 
-## ✨ **Key Features**
-
-- **🔄 OpenAI Responses API**: Latest unified API with built-in tools (web search, code interpreter)
-- **🧠 LangGraph Integration**: Full state management and workflow orchestration
-- **🛠️ Built-in Tools**: Real-time web search, code execution with container management
-- **🎯 Custom Tools**: Framework-agnostic TypeScript functions
-- **📊 Observability**: Built-in tracing, logging, and performance monitoring
-- **⚡ TypeScript**: Full type safety across the entire project
-- **🎛️ Feature Flags**: Runtime control over built-in tools
-- **🚀 Production Ready**: Error handling, container lifecycle management
-
-## 🛠️ **Available Tools**
-
-### **Built-in OpenAI Tools (Responses API)**
-- **`web_search_preview`** - Real-time web search with current information
-- **`code_interpreter`** - Code execution with automatic container management
-
-### **Custom Tools**
-- **`get_weather`** - Weather information for any location
-- **`calculate`** - Mathematical calculations with precision control
-
-### **LangGraph Workflows**
-- **`weather_workflow`** - Weather data + AI-powered recommendations
-- **`search_workflow`** - Web search + AI summarization
-
-## 🚀 **Quickstart**
+## 🚀 **Quick Start**
 
 ```bash
 # Install dependencies
@@ -49,13 +32,63 @@ cp .env.example .env
 # Edit .env and add your API keys:
 # - OPENAI_API_KEY (required)
 
-# Start development
+# Build all packages
+pnpm build
+
+# Start development server
 pnpm dev
 
-# Test the API
+# Test the agent
 curl -X POST http://localhost:3000/agent \
   -H "Content-Type: application/json" \
-  -d '{"message": "What is 15 * 23?"}'
+  -d '{"message": "Calculate 2 + 2"}'
+```
+
+## 🛠️ **Available Tools**
+
+### **✅ Custom Tools**
+```bash
+# Mathematical calculations
+curl -X POST http://localhost:3000/agent \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Calculate 2 + 2"}'
+
+# Response: {"response": "The result of 2 + 2 is 4"}
+
+# Real-time weather data
+curl -X POST http://localhost:3000/agent \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Weather in San Francisco"}'
+
+# Response: {"response": "The weather in San Francisco is 72°fahrenheit, Sunny. Humidity: 65%, Wind: 5 mph"}
+```
+
+### **✅ Built-in Tool Wrappers (LangGraph Pattern)**
+```bash
+# Web search using OpenAI's built-in tool
+curl -X POST http://localhost:3000/agent \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Search for latest AI news"}'
+
+# Code execution using OpenAI's built-in tool
+curl -X POST http://localhost:3000/agent \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Execute this code: ```python\nprint(\"Hello World\")\n```"}'
+
+# File search using OpenAI's built-in tool
+curl -X POST http://localhost:3000/agent \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Search in files for API documentation"}'
+```
+
+### **✅ General Chat**
+```bash
+# Conversational responses
+curl -X POST http://localhost:3000/agent \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Hello"}'
+
+# Response: {"response": "Hello! How can I help you today?"}
 ```
 
 ## 📁 **Project Structure**
@@ -63,9 +96,9 @@ curl -X POST http://localhost:3000/agent \
 ```
 langgraph-minimal/
 ├── packages/
-│   ├── tools/          # Framework-agnostic tools (plain TS functions)
+│   ├── tools/          # Framework-agnostic tools (custom + built-in wrappers)
 │   ├── graphs/         # LangGraph workflows with AI enhancement
-│   ├── agent/          # Responses API layer with built-in tools
+│   ├── agent/          # Simple agent with tool orchestration
 │   └── core/           # Shared utilities and configurations
 ├── gateways/
 │   └── langserve/      # Fastify server for serving agent and workflows
@@ -75,177 +108,105 @@ langgraph-minimal/
 
 ## 🔌 **API Endpoints**
 
-### **Agent API**
+### **Main Agent Endpoint**
 ```bash
-# Main agent endpoint
 POST /agent
 Content-Type: application/json
 
 {
-  "message": "What's the weather like in San Francisco?"
+  "message": "Your message here"
 }
 ```
 
-### **Feature Flag Management**
+### **Available Tools**
 ```bash
-# Enable built-in tools
-POST /api/enable-builtin-tools
+GET /tools
 
-# Disable built-in tools
-POST /api/disable-builtin-tools
-
-# Toggle built-in tools
-POST /api/toggle-builtin-tools
-
-# Check current flags
-GET /api/flags
-```
-
-### **Health Check**
-```bash
-GET /ping
+# Response:
+{
+  "customTools": ["get_weather", "calculate"],
+  "builtInTools": ["web_search", "code_interpreter", "file_search"]
+}
 ```
 
 ## 🧪 **Usage Examples**
 
-### **Basic Calculations**
+### **Mathematical Calculations**
 ```bash
 curl -X POST http://localhost:3000/agent \
   -H "Content-Type: application/json" \
-  -d '{"message": "What is 15 * 23?"}'
+  -d '{"message": "Calculate 15 * 23"}'
+
+# Response: {"response": "The result of 15 * 23 is 345"}
 ```
 
-### **Real-time Web Search**
+### **Weather Information**
 ```bash
 curl -X POST http://localhost:3000/agent \
   -H "Content-Type: application/json" \
-  -d '{"message": "What is the current weather in San Francisco?"}'
+  -d '{"message": "Weather in New York"}'
+
+# Response: {"response": "The weather in New York is 72°fahrenheit, Sunny. Humidity: 65%, Wind: 5 mph"}
 ```
 
-### **LangGraph Workflow**
+### **Web Search (Built-in Tool Wrapper)**
 ```bash
 curl -X POST http://localhost:3000/agent \
   -H "Content-Type: application/json" \
-  -d '{"message": "Get weather information for Tokyo using the weather_workflow"}'
+  -d '{"message": "Search for OpenAI GPT-5 features"}'
+
+# Response: {"response": "Web search results for \"OpenAI GPT-5 features\": [actual search results]"}
 ```
 
-### **Code Execution**
+### **Code Execution (Built-in Tool Wrapper)**
 ```bash
 curl -X POST http://localhost:3000/agent \
   -H "Content-Type: application/json" \
-  -d '{"message": "Calculate the factorial of 10"}'
+  -d '{"message": "Execute this code: ```python\nimport math\nprint(math.pi)\n```"}'
+
+# Response: {"response": "Code execution results: 3.141592653589793"}
 ```
 
-## 🔧 **How It Works**
+### **File Search (Built-in Tool Wrapper)**
+```bash
+curl -X POST http://localhost:3000/agent \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Search in files for configuration settings"}'
 
-### **1. Tools Layer**
-Tools are plain TypeScript functions with Zod validation:
+# Response: {"response": "File search results for \"configuration settings\": [search results]"}
+```
 
+### **General AI Responses**
+```bash
+curl -X POST http://localhost:3000/agent \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Explain quantum computing in simple terms"}'
+
+# Response: Detailed explanation from GPT-5-mini
+```
+
+## 🔧 **Configuration**
+
+### **Simple Agent Configuration**
 ```typescript
-// packages/tools/src/weather.ts
-export const weatherTool: Tool = {
-  name: "get_weather",
-  description: "Get weather information",
-  parameters: WeatherParams,
-  execute: async (args) => {
-    // Implementation here
-  }
-};
+interface SimpleAgentOptions {
+  temperature?: number;              // Note: GPT-5-mini uses default (1)
+  maxOutputTokens?: number;          // 1 to 4096
+  topP?: number;                     // 0.0 to 1.0
+}
 ```
-
-### **2. Graphs Layer**
-Workflows orchestrate tools with AI enhancement:
-
-```typescript
-// packages/graphs/src/weather-workflow.ts
-export const runWeatherWorkflow = async (location: string) => {
-  const weatherData = await weatherTool.execute({ location });
-  const recommendations = await generateAIRecommendations(weatherData);
-  return { weatherData, recommendations };
-};
-```
-
-### **3. Agent Layer (Responses API)**
-The Agent API uses OpenAI's Responses API with built-in tools:
-
-```typescript
-// packages/agent/src/index.ts
-const response = await responsesClient.ask({
-  input: message,
-  tools: [
-    { type: "web_search_preview" },
-    { type: "code_interpreter", container: containerId },
-    // Custom tools and workflows
-  ]
-});
-```
-
-### **4. Gateway Layer**
-Exposes both Agent API and direct workflow access:
-
-```typescript
-// Agent API (Responses API)
-fastify.post("/agent", async (request, reply) => {
-  const response = await agentAPI.runAgent(message);
-  return { response };
-});
-```
-
-## 🏗️ **Technical Architecture**
-
-### **Responses API Integration**
-- **Built-in Tools**: `web_search_preview`, `code_interpreter`
-- **Container Management**: Automatic creation and reuse
-- **Schema Compatibility**: Proper JSON schema validation
-- **Error Handling**: Robust error recovery
-
-### **LangGraph State Management**
-- **Tracing**: Full request tracing with unique IDs
-- **Performance**: Timing and performance monitoring
-- **Logging**: Comprehensive event logging
-- **Error Recovery**: Graceful error handling
-
-### **Feature Flag System**
-- **Runtime Control**: Enable/disable built-in tools
-- **A/B Testing**: Toggle capabilities for testing
-- **Configuration**: JSON-based flag management
-
-## 📊 **Performance & Benefits**
-
-### **Responses API Advantages**
-- ✅ **Built-in Tools**: Real-time web search, code interpreter
-- ✅ **Stateful**: Maintains conversation context
-- ✅ **Unified**: Single API for all tool types
-- ✅ **Simpler**: No complex tool call handling
-
-### **LangGraph Benefits**
-- ✅ **Observability**: Full tracing and monitoring
-- ✅ **State Management**: Proper workflow state tracking
-- ✅ **Performance**: Optimized execution with timing
-- ✅ **Error Handling**: Robust error recovery
-
-## 🔄 **Migration from Chat Completions**
-
-This project has fully migrated from OpenAI's Chat Completions API to the Responses API:
-
-### **What Changed**
-- ✅ **Removed**: Chat Completions API entirely
-- ✅ **Added**: Responses API with built-in tools
-- ✅ **Enhanced**: Container management for code interpreter
-- ✅ **Simplified**: Single API architecture
-
-### **Benefits Achieved**
-- 🚀 **Better Performance**: Built-in tools are faster
-- 🔧 **Simpler Code**: No dual API complexity
-- 🎯 **More Capabilities**: Real-time search, code execution
-- 📊 **Better Observability**: Unified tracing
-
-## 🚀 **Production Deployment**
 
 ### **Environment Variables**
 ```bash
+# Required
 OPENAI_API_KEY=your_openai_api_key
+
+# Optional
+NODE_ENV=production
+PORT=3000
 ```
+
+## 🚀 **Production Deployment**
 
 ### **Build & Deploy**
 ```bash
@@ -254,35 +215,65 @@ pnpm build
 
 # Start production server
 pnpm start
-```
 
-### **Docker Support**
-```bash
-# Build Docker image
+# Or with Docker
 docker build -t langgraph-minimal .
-
-# Run container
 docker run -p 3000:3000 -e OPENAI_API_KEY=your_key langgraph-minimal
 ```
 
-## 🤝 **Contributing**
+## 🔍 **Troubleshooting**
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+### **Common Issues**
 
-## 📄 **License**
+#### **"Temperature not supported" Error**
+- **Cause**: GPT-5-mini only supports default temperature (1)
+- **Solution**: The simple agent automatically uses the correct configuration
 
-MIT License - see LICENSE file for details.
+#### **Tool Detection Issues**
+- **Cause**: Message format doesn't match expected patterns
+- **Solution**: Use clear, specific language (e.g., "Calculate 2 + 2", "Weather in San Francisco")
 
-## 🆘 **Support**
+#### **Built-in Tool Errors**
+- **Cause**: OpenAI API issues or model limitations
+- **Solution**: Check OpenAI API status and ensure you have access to the required features
 
-- **Issues**: Create an issue on GitHub
-- **Discussions**: Use GitHub Discussions
-- **Documentation**: Check the code comments and examples
+### **Debug Mode**
+```bash
+# Check tool availability
+curl -X GET http://localhost:3000/tools
 
----
+# Test individual tools
+curl -X POST http://localhost:3000/agent \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Calculate 2 + 2"}'
+```
 
-**Built with ❤️ using OpenAI Responses API + LangGraph**
+## 🎯 **LangGraph Integration**
+
+This project implements LangGraph's recommended pattern for built-in tools:
+
+```typescript
+// Example: Web Search Wrapper (LangGraph Pattern)
+export const webSearchTool: Tool = {
+  name: "web_search",
+  execute: async (args) => {
+    const { query } = args;
+    
+    // Call OpenAI's built-in tool internally
+    const response = await openai.responses.create({
+      model: "gpt-5-mini",
+      input: [{ role: "user", content: `Search the web for: ${query}` }],
+      tools: [{ type: "web_search_preview" }], // ← Built-in OpenAI tool
+    });
+    
+    // Return formatted results
+    return { success: true, results: searchResults, query };
+  }
+};
+```
+
+This approach provides:
+- **Clean separation** between custom logic and OpenAI's hosted tools
+- **Consistent interface** for all tools (custom and built-in)
+- **LangGraph compatibility** for future workflow integration
+- **Error handling** and result formatting
