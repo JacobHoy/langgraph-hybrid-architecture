@@ -1,5 +1,4 @@
 import OpenAI from 'openai';
-import { Agent, run, webSearchTool, codeInterpreterTool } from '@openai/agents';
 import { toolRegistry } from '@langgraph-minimal/tools';
 import { 
   createTracer, 
@@ -16,38 +15,19 @@ import {
 
 export class AgentAPI {
   private openai: OpenAI;
-  private agent: Agent | null = null;
   private tools: any[];
-  private useAgentAPI: boolean = false;
 
   constructor() {
     this.openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
     });
     
-    // Try to initialize OpenAI Agent API with hosted tools
-    try {
-      this.agent = new Agent({
-        name: "HybridAgent",
-        model: "gpt-5-mini",
-        tools: [
-          webSearchTool(),
-          codeInterpreterTool()
-        ],
-        instructions: "You are a helpful assistant that can search the web, run code, and use custom tools. Use web search for current information and code interpreter for calculations."
-      });
-      this.useAgentAPI = true;
-      console.log('✅ OpenAI Agent API initialized with hosted tools');
-    } catch (error) {
-      console.log('⚠️ OpenAI Agent API not available, using Chat Completions API');
-      this.useAgentAPI = false;
-    }
-    
-    // Get all available custom tools
-    this.tools = toolRegistry.getOpenAITools();
-    
-    // Add graph-based tools (LangGraph workflows wrapped as functions)
-    this.tools.push(
+    // Initialize tools array with custom tools
+    this.tools = [
+      // Custom tools from registry
+      ...toolRegistry.getOpenAITools(),
+      
+      // Graph-based tools (LangGraph workflows wrapped as functions)
       {
         type: "function" as const,
         function: {
@@ -77,7 +57,9 @@ export class AgentAPI {
           }
         }
       }
-    );
+    ];
+    
+    console.log('✅ OpenAI Chat Completions API initialized with custom tools and workflows');
   }
 
   // Function handlers for graph-based tools
@@ -91,31 +73,6 @@ export class AgentAPI {
     return await runSearchWorkflow(args.query, runId);
   }
 
-  // Try OpenAI Agent API first, fallback to Chat Completions
-  private async tryAgentAPI(message: string, tracer: any): Promise<string | null> {
-    if (!this.agent || !this.useAgentAPI) {
-      return null;
-    }
-
-    try {
-      logGraphEvent("agent_api_attempt", { message }, tracer.id);
-      
-      // Use the correct run function
-      const result = await run(this.agent, message);
-      
-      if (result && result.finalOutput) {
-        logGraphEvent("agent_api_success", { result: result.finalOutput }, tracer.id);
-        return result.finalOutput;
-      }
-      
-      return null;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      logGraphEvent("agent_api_fallback", { error: errorMessage }, tracer.id);
-      return null;
-    }
-  }
-
   // Main agent function with LangSmith tracing
   async runAgent(message: string) {
     const tracer = createTracer("agent-request", { message });
@@ -123,13 +80,7 @@ export class AgentAPI {
     try {
       logGraphEvent("agent_request_started", { message }, tracer.id);
       
-      // Try OpenAI Agent API first (for queries that can use hosted tools)
-      const agentResult = await this.tryAgentAPI(message, tracer);
-      if (agentResult) {
-        return agentResult;
-      }
-      
-      // Fallback to Chat Completions API with custom tools and workflows
+      // Use Responses API with unified tools array
       const response = await trackPerformance(tracer.id, "llm_initial_call", async () => {
         return await this.openai.chat.completions.create({
           model: "gpt-5-mini",
@@ -239,12 +190,8 @@ export class AgentAPI {
   // Get available tools
   getAvailableTools() {
     return {
-      agentAPI: this.useAgentAPI ? "enabled" : "disabled",
-      hostedTools: this.useAgentAPI ? ["web_search", "code_interpreter"] : [],
-      customTools: this.tools,
-      note: this.useAgentAPI 
-        ? "Using OpenAI Agent API with hosted tools (web_search, code_interpreter) + Chat Completions API for custom tools and workflows"
-        : "Using Chat Completions API with custom tools and workflows (Agent API not available)"
+      customTools: this.tools.filter(tool => tool.type === "function"),
+      note: "Using OpenAI Chat Completions API with custom tools and LangGraph workflows"
     };
   }
 }
