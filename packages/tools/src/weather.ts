@@ -23,7 +23,7 @@ export const weatherTool: Tool = {
         default: "fahrenheit"
       }
     },
-    required: ["location"]
+    required: ["location", "unit"]
   },
   execute: async (args) => {
     const { location, unit } = WeatherParams.parse(args);

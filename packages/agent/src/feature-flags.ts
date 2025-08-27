@@ -1,64 +1,128 @@
 export interface FeatureFlags {
   enableBuiltInTools: boolean;
-  enableJsonSchemaOutput: boolean;
+  enableStructuredOutput: boolean;
+  enableFileSearch: boolean;
+  enableRetrieval: boolean;
+  enableComputerUse: boolean;
 }
 
 class FeatureFlagManager {
   private flags: FeatureFlags = {
     enableBuiltInTools: true,
-    enableJsonSchemaOutput: false
+    enableStructuredOutput: false,
+    enableFileSearch: false,
+    enableRetrieval: false,
+    enableComputerUse: false
   };
 
-  /**
-   * Get current feature flags
-   */
-  getFlags(): FeatureFlags {
-    return { ...this.flags };
-  }
-
-  /**
-   * Update feature flags
-   */
-  updateFlags(updates: Partial<FeatureFlags>): void {
-    this.flags = { ...this.flags, ...updates };
-    console.log('🔧 Feature flags updated:', this.flags);
-  }
-
-  /**
-   * Check if built-in tools should be enabled
-   */
+  // Built-in tools management
   shouldEnableBuiltInTools(): boolean {
     return this.flags.enableBuiltInTools;
   }
 
-  /**
-   * Check if JSON schema output should be used
-   */
-  shouldUseJsonSchemaOutput(): boolean {
-    return this.flags.enableJsonSchemaOutput;
+  enableBuiltInTools() {
+    this.flags.enableBuiltInTools = true;
+    this.logFlags();
   }
 
-  /**
-   * Enable built-in tools
-   */
-  enableBuiltInTools(): void {
-    this.updateFlags({ enableBuiltInTools: true });
+  disableBuiltInTools() {
+    this.flags.enableBuiltInTools = false;
+    this.logFlags();
   }
 
-  /**
-   * Disable built-in tools
-   */
-  disableBuiltInTools(): void {
-    this.updateFlags({ enableBuiltInTools: false });
+  toggleBuiltInTools() {
+    this.flags.enableBuiltInTools = !this.flags.enableBuiltInTools;
+    this.logFlags();
   }
 
-  /**
-   * Toggle built-in tools
-   */
-  toggleBuiltInTools(): void {
-    this.updateFlags({ enableBuiltInTools: !this.flags.enableBuiltInTools });
+  // Structured output management
+  shouldEnableStructuredOutput(): boolean {
+    return this.flags.enableStructuredOutput;
+  }
+
+  enableStructuredOutput() {
+    this.flags.enableStructuredOutput = true;
+    this.logFlags();
+  }
+
+  disableStructuredOutput() {
+    this.flags.enableStructuredOutput = false;
+    this.logFlags();
+  }
+
+  toggleStructuredOutput() {
+    this.flags.enableStructuredOutput = !this.flags.enableStructuredOutput;
+    this.logFlags();
+  }
+
+  // File search management
+  shouldEnableFileSearch(): boolean {
+    return this.flags.enableFileSearch;
+  }
+
+  enableFileSearch() {
+    this.flags.enableFileSearch = true;
+    this.logFlags();
+  }
+
+  disableFileSearch() {
+    this.flags.enableFileSearch = false;
+    this.logFlags();
+  }
+
+  toggleFileSearch() {
+    this.flags.enableFileSearch = !this.flags.enableFileSearch;
+    this.logFlags();
+  }
+
+  // Retrieval management
+  shouldEnableRetrieval(): boolean {
+    return this.flags.enableRetrieval;
+  }
+
+  enableRetrieval() {
+    this.flags.enableRetrieval = true;
+    this.logFlags();
+  }
+
+  disableRetrieval() {
+    this.flags.enableRetrieval = false;
+    this.logFlags();
+  }
+
+  toggleRetrieval() {
+    this.flags.enableRetrieval = !this.flags.enableRetrieval;
+    this.logFlags();
+  }
+
+  // Computer use management
+  shouldEnableComputerUse(): boolean {
+    return this.flags.enableComputerUse;
+  }
+
+  enableComputerUse() {
+    this.flags.enableComputerUse = true;
+    this.logFlags();
+  }
+
+  disableComputerUse() {
+    this.flags.enableComputerUse = false;
+    this.logFlags();
+  }
+
+  toggleComputerUse() {
+    this.flags.enableComputerUse = !this.flags.enableComputerUse;
+    this.logFlags();
+  }
+
+  // Get all flags
+  getFlags(): FeatureFlags {
+    return { ...this.flags };
+  }
+
+  private logFlags() {
+    console.log('🔧 Feature flags updated:', this.flags);
   }
 }
 
-// Export singleton instance
 export const featureFlags = new FeatureFlagManager();

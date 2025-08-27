@@ -14,7 +14,7 @@
     "clean": "pnpm --recursive clean"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
+    "@types/node": "^24.3.0",
     "typescript": "^5.0.0"
   },
   "engines": {
@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@openai/agents": "^0.0.17",
-    "dotenv": "^16.6.1",
+    "dotenv": "^17.2.1",
     "openai": "^5.16.0"
   }
 }

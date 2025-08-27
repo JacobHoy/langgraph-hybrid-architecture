@@ -23,7 +23,7 @@ export const calculatorTool: Tool = {
         default: 2
       }
     },
-    required: ["expression"]
+    required: ["expression", "precision"]
   },
   execute: async (args) => {
     const { expression, precision } = CalculatorParams.parse(args);
